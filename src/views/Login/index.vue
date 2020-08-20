@@ -14,6 +14,10 @@
           <label for="">密码</label>
           <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
         </el-form-item>
+         <el-form-item prop="passwords" class="item-form" v-if="model=='注册'">
+          <label for="">重复密码</label>
+          <el-input type="password" v-model="ruleForm.passwords" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item  prop="code" class="item-form">
           <label for="">验证码</label>
           <el-row :gutter="20">
@@ -63,10 +67,20 @@ export default {
           callback();
         }
       };
+       var validatePasswords = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入重复密码'));
+        } else if (validatePass(value)) {
+          callback(new Error('输入重复密码格式不对!'));
+        } else {
+          callback();
+        }
+      };
       return{
          ruleForm: {
           username: '',
           password: '',
+          passwords: '',
           code: ''
         },
         rules: {
@@ -76,6 +90,9 @@ export default {
           password: [
             { validator: validatePassword, trigger: 'blur' }
           ],
+           passwords: [
+            { validator: validatePasswords, trigger: 'blur' }
+          ],
           code: [
             { validator: checkCode, trigger: 'blur' }
           ]
@@ -83,7 +100,8 @@ export default {
         menuTab:[
           {txt:'登录',current:true},
           {txt:'注册',current:false}
-        ]
+        ],
+        model:'登录'
       }
     },
     methods:{
@@ -93,6 +111,7 @@ export default {
           el.current =false;
         })
         data.current =true;
+        this.model = data.txt;
       },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
