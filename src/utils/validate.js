@@ -28,6 +28,7 @@ export function validatePass(value){
  * 验证验证码
  */
 export function validateVCode(value){
+    console.log(value);
     let reg = /^[a-z0-9]{6}$/;
     return !reg.test(value) ? true : false;
 }

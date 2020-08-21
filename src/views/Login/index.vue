@@ -4,29 +4,29 @@
      <ul class="menu-tab">
        <li v-for="(item,index) in menuTab" :key="index" :class="item.current?'current':''" @click="toggleMenu(item)">{{item.txt}}</li>
      </ul>
-     <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" class="login-from" size="medium">
+     <el-form :model="ruleForm" status-icon :rules="rules" ref="loginFrom" class="login-from" size="medium">
         <el-form-item prop="username" class="item-form">
-          <label for="">邮箱</label>
-          <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
+          <label for="username">邮箱</label>
+          <el-input id="username" type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item prop="password" class="item-form">
-          <label for="">密码</label>
-          <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
+          <label for="password">密码</label>
+          <el-input id="password" type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
         </el-form-item>
-         <el-form-item prop="passwords" class="item-form" v-if="model=='注册'">
-          <label for="">重复密码</label>
-          <el-input type="password" v-model="ruleForm.passwords" autocomplete="off"></el-input>
+         <el-form-item prop="passwords" class="item-form" v-if="model==='register'">
+          <label for="passwords">重复密码</label>
+          <el-input id="passwords" type="password" v-model="ruleForm.passwords" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item  prop="code" class="item-form">
-          <label for="">验证码</label>
+          <label for="code">验证码</label>
           <el-row :gutter="20">
-            <el-col :span="15"><el-input v-model.number="ruleForm.code"></el-input></el-col>
-            <el-col :span="9"><el-button type="success" class="block">验证码</el-button></el-col>          
+            <el-col :span="15"><el-input id="code" v-model="ruleForm.code" type="text"></el-input></el-col>
+            <el-col :span="9"><el-button type="success" class="block" @click="getSms" :disabled="codeButtonStatus.status">{{codeButtonStatus.text}}</el-button></el-col>          
           </el-row>        
         </el-form-item>
         <el-form-item>
-          <el-button type="danger" @click="submitForm('ruleForm')" class="login-btn block">提交</el-button>
+          <el-button type="danger" @click="submitForm('loginFrom')" class="login-btn block" :disabled="loginButtonStatus">{{model==='login'?"登录":"注册"}}</el-button>
         </el-form-item>
       </el-form>
    </div>
@@ -34,7 +34,11 @@
 </template>
 
 <script>
+//加密
+import sha1 from "js-sha1";
 import { stripscript, validatePass, validateEmail, validateVCode } from '@/utils/validate';
+import { Message } from 'element-ui';
+import { GetSms,Login,Register } from "@/api/login"
 export default {
     name:'login',
     data(){
@@ -98,10 +102,15 @@ export default {
           ]
         },
         menuTab:[
-          {txt:'登录',current:true},
-          {txt:'注册',current:false}
+          {txt:'登录',current:true,type:'login'},
+          {txt:'注册',current:false,type:'register'}
         ],
-        model:'登录'
+        model:'login',
+        codeButtonStatus:{
+          status:false,
+          text:'获取验证码'
+        },
+        loginButtonStatus:false,
       }
     },
     methods:{
@@ -111,19 +120,109 @@ export default {
           el.current =false;
         })
         data.current =true;
-        this.model = data.txt;
+        this.model = data.type;
+        //清楚表单
+        this.resetFromData();
       },
-      submitForm(formName) {
+      resetFromData(){
+        console.log(this.$refs);
+        this.$refs['loginFrom'].resetFields()
+      },
+      //获取验证码接口
+      getSms(){
+        if(this.ruleForm.username==''){
+           Message.error('邮箱不能为空！！!');
+           return false;
+        }else if(validateEmail(this.ruleForm.username)){
+            Message.error('邮箱格式有误，请重新输入！！!');
+        }else{
+          let params={
+            username:this.ruleForm.username,
+            module:this.module
+          }
+          this.codeButtonStatus.text ='发送中';
+          this.codeButtonStatus.status =true;
+          //this.countDown(60);
+          GetSms(params).then(res =>{
+            Message.success(res.data.message);
+            console.log(res);
+            this.codeButtonStatus.status =false;
+            //调用定时器
+            this.countDown(60);
+
+          }).catch(err =>{
+            console.log(err);
+          })
+        }
+
+      },
+      //定时器
+      countDown(val){
+        console.log(val);
+        let time = val;
+        if(this.timer){
+          clearInterval(this.timer)
+        }
+        this.timer = setInterval(() =>{
+          time--;
+          if(time===0){
+            clearInterval(this.timer)
+            this.codeButtonStatus.text ='再次获取';
+            this.codeButtonStatus.status =false;
+          }else{
+            this.codeButtonStatus.text =`倒计时${time}秒`;
+          }
+        },1000)
+      },
+      //登录或注册
+      submitForm(formName) {   
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            alert('submit!');
+            
+            this.model ==='login'?this.login():this.register()
           } else {
             console.log('error submit!!');
             return false;
           }
         });
       },
-    }
+      //去登陆
+      login(){
+        let params={
+          username:this.ruleForm.username,
+          password:sha1(this.ruleForm.password),
+          code:this.ruleForm.code,
+        }
+
+      },
+      //去注册
+      register(){
+        let params={
+          username:this.ruleForm.username,
+          password:sha1(this.ruleForm.password),
+          code:this.ruleForm.code,
+          module:'register'
+        }
+        Register(params).then(res =>{
+          Message.success(res.data.message);
+          console.log(res);
+          this.toggleMenu(this.menuTab[0]);
+          //清楚定时器
+          this.clearCountDown();
+
+        }).catch(err =>{
+          console.log(err);
+        })
+
+      },
+       //清除倒计时
+      clearCountDown(){
+        this.codeButtonStatus.status=false;
+        this.codeButtonStatus.text="获取验证码";
+        clearInterval(this.timer);
+      }
+    },
+
 }
 </script>
 <style lang="scss" scoped>
