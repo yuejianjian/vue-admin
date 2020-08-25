@@ -2,7 +2,7 @@
     <div id="nav-wrap">
         <h1 class="logo"><img src="../../../assets/logo.png" alt=""></h1>
         <el-menu
-        :default-active="defalutActive"
+        default-active="1"
         class="el-menu-vertical-demo"
         background-color="transparent"
         text-color="#fff"
@@ -10,13 +10,19 @@
         router
         >
         <template v-for="(item,index) in menunav">
-            <el-submenu index="1" :key="index">
+            <el-submenu :index="index + ''" :key="index.id" v-if="!item.hidden">
                 <template slot="title">
-                <i class="el-icon-location"></i>
+                <i :class="item.meta.icon"></i>
                 <span>{{item.meta.name}}</span>
                 </template>
-                <el-menu-item-group v-for="(items,indexs) in item.children" :key="indexs">             
-                    <el-menu-item index="1-1">{{items.meta.name}}</el-menu-item>              
+                <el-menu-item-group v-for="(items,indexs) in item.children" :key="indexs.id">             
+                    <el-menu-item :index="items.path">
+                        <template slot="title">
+                            <i :class="items.meta.icon"></i>
+                            <span>{{items.meta.name}}</span>
+                        </template>
+                    
+                    </el-menu-item>              
                 </el-menu-item-group>           
             </el-submenu>
         </template>
@@ -30,18 +36,20 @@ export default {
     data(){
         return{
             menunav:[],
+            defalutActive:''
             
         }
     },
     computed: {
-        defalutActive(){
-          console.log(this.$route);
-          return this.$route;
-        }
+        // defalutActive(){
+        //   console.log(this.$route);
+        //   return this.$route;
+        // }
     },
     mounted(){
         this.menunav =this.$router.options.routes;
         console.log( this.menunav );
+        console.log(this.$store.state.name);
     },
     methods:{
       
