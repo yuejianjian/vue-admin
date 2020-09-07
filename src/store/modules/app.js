@@ -2,6 +2,11 @@ const state ={
     name:" 乐坚坚",
     num:1
 }
+const getters ={
+    num(state){
+        return state.num;
+    }
+}
 const mutations ={
     toeadit(state){
         console.log(state);
@@ -28,6 +33,7 @@ const actions={
 
 export default{
     state,
+    getters,
     mutations,
     actions
 }

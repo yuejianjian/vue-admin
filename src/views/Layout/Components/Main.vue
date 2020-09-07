@@ -13,7 +13,13 @@ export default {
     name:'Main',
     data(){
         return{
-            num:0,
+            
+        }
+    },
+    computed:{
+        num(){
+            console.log(this.$store.getters.num);
+            return this.$store.getters.num;
         }
     },
     methods:{
@@ -21,16 +27,16 @@ export default {
             console.log(this.$store)
             this.$store.commit('toeadit');
             console.log(this.$store.state);
-            this.num =this.$store.state.app.num;
+            //this.num =this.$store.state.app.num;
         },
         jian(){
              this.$store.commit('tojian');
-             this.num =this.$store.state.app.num;
+             //this.num =this.$store.state.app.num;
         },
         yibu(){
             this.$store.dispatch('yibu');
             console.log(this.$store.state.app.num);
-             this.num =this.$store.state.app.num;
+             //this.num =this.$store.state.app.num;
         }
     }
 }     
