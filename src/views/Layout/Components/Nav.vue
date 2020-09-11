@@ -26,23 +26,6 @@
                 </el-menu-item-group>           
             </el-submenu>
         </template>
-        <template v-for="(item,index) in menunav">
-            <el-submenu :index="index + ''" :key="index.id" v-if="!item.hidden">
-                <template slot="title">
-                <i :class="item.meta.icon"></i>
-                <span>{{item.meta.name}}</span>
-                </template>
-                <el-menu-item-group v-for="(items,indexs) in item.children" :key="indexs.id">             
-                    <el-menu-item :index="items.path">
-                        <template slot="title">
-                            <i :class="items.meta.icon"></i>
-                            <span>{{items.meta.name}}</span>
-                        </template>
-                    
-                    </el-menu-item>              
-                </el-menu-item-group>           
-            </el-submenu>
-        </template>
        
         </el-menu>
     </div>

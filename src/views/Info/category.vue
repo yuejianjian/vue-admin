@@ -1,6 +1,7 @@
 <template>
     <div>      
         信息分类
+        {{num}}
     </div>
 </template>
 <script>
@@ -11,7 +12,12 @@ export default {
             
         }
     },
-
+    computed:{
+        num(){
+            console.log(this.$store.getters.num);
+            return this.$store.getters.num;
+        }
+    },
 
 }     
 </script>
