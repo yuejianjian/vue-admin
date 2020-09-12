@@ -1,5 +1,6 @@
 import axios from "axios"
 import { Message } from "element-ui";
+import { getToken ,getUserName } from "@/utils/app"
 
 //创建axios,赋值变量service
 console.log(process.env.NODE_ENV);
@@ -17,6 +18,8 @@ const service = axios.create(
 // 添加请求拦截器
 service.interceptors.request.use(function (config) {
     // 在发送请求之前做些什么
+    config.headers['Tokey'] = getToken()
+    config.headers['UserName'] = getUserName()
     return config;
   }, function (error) {
     // 对请求错误做些什么

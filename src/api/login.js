@@ -28,3 +28,13 @@ export function Register(data){
         data
     })
 }
+/**
+ * 退出
+ */
+export function Logout(data = {}){
+    return service.request({
+        method: "post",
+        url: "/logout/",
+        data
+    })
+}

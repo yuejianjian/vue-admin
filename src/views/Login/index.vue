@@ -39,6 +39,7 @@ import sha1 from "js-sha1";
 import { stripscript, validatePass, validateEmail, validateVCode } from '@/utils/validate';
 import { Message } from 'element-ui';
 import { GetSms,Login,Register } from "@/api/login"
+import {getUserName,getPassWord,setPassWord} from "@/utils/app"
 export default {
     name:'login',
     data(){
@@ -113,7 +114,22 @@ export default {
         loginButtonStatus:false,
       }
     },
+    mounted(){
+      this.getcookie();
+    },
+    
     methods:{
+      //获取登录账号密码
+      getcookie(){
+          let username=getUserName();
+          if(username !=''){
+            this.ruleForm.username =username;
+          }
+          let password =getPassWord();
+          if(password != ''){
+            this.ruleForm.password =password;
+          }
+      },
       //登录注册切换
       toggleMenu(data){
         this.menuTab.forEach(el =>{
@@ -193,6 +209,14 @@ export default {
           password:sha1(this.ruleForm.password),
           code:this.ruleForm.code,
         }
+        this.$store.dispatch('login',params).then(response =>{
+          this.$router.push({
+            name:'Console'
+          })
+
+          console.log(response);
+          setPassWord(this.ruleForm.password)
+        }).catch(err =>{})
 
       },
       //去注册
